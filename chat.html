@@ -7,59 +7,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twitch chat</title>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet"> 
 
     <style>
-    #chat {
-    width: 400px;
-    height: 350px;
-    overflow-y: hidden; 
-    display: flex;
-    flex-direction: column-reverse;
-    background: #fefefe;
-    }
+        body {
+              background-image: url('overlay_chatting2.png');
+              background-size: 1920px 1080px;
+              font-family: 'Poppins', sans-serif;
+            }
 
-    #chat::-webkit-scrollbar {
-        display: none;
-    }
-
-    #chat ul {
-        list-style-type: none;
-        list-style-position: outside;
-    }
-
-    #chat li {
-        background-color: hsl(196, 58%, 93%);
-        box-sizing: border-box;
-        padding: 1rem 10px;
-        margin-bottom: 10px;
-        border: 4px solid;
-    }
-
-    #chat li:last-of-type {
-        animation-name: slide-in-left;
-        animation-duration: 0.15s;
-        animation-timing-function: ease-in;
-    }
-    #chat li:not(:last-of-type) {
-        opacity: 0.5;
-    }
-
-
-    #chat blockquote {
-        font-size: 1.2rem;
-    }
-
-    @keyframes slide-in-left {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
+        #chat {
+            width: 700px;
+            height: 600px;
+            overflow: hidden; 
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
         }
 
-        to {
-            transform: translateX(0);
-            opacity: 1;
+        #chat::-webkit-scrollbar {
+            display: none;
         }
-    }
+
+        #chat ul {
+            list-style-type: none;
+            list-style-position: outside;
+            padding: 0;
+            margin: 0;
+        }
+
+        #chat li {
+            color:#fff;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+        }
+
+        #chat li:last-of-type {
+            animation-name: slide-in-left;
+            animation-duration: 0.75s;
+            animation-timing-function: ease-out;
+        }
+        #chat li:not(:last-of-type) {
+            opacity: 0.5;
+        }
+
+        #chat div {
+            z-index: 2;
+            border-radius: 100pt;
+            color: #fff;
+            padding: 5pt 10pt;
+            margin-bottom: -20px;
+            width: 200px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            text-align: center;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 2px;
+        }
+
+        #chat li:nth-child(odd) div {
+            background: #8b4999;
+        }
+
+        #chat li:nth-child(even) div {
+            background: #c395c9;
+        }
+
+
+        #chat blockquote {
+            z-index: 1;
+            padding: 8pt 8pt 8pt 16pt;
+            margin:5pt 0pt;
+            border: 1px solid rgba(139,108,155,0.5);
+            border-radius: 100px;
+            background-color: rgba(0,0,0,0.3);
+            min-width: 200pt;
+        }
+
+        @keyframes slide-in-left {
+            from {
+                transform: translateX(800px);
+                opacity: 0;
+
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
 
 
     </style>
@@ -76,11 +119,13 @@ var chat = document.querySelector("#chat>ul");
 ComfyJS.onChat = (user, message, flags, self, extra) => {
         var newMessage = document.createElement("li");
         var text = document.createElement("blockquote");
+        var userName = document.createElement("div");
 
-        newMessage.innerText = user;
+        userName.innerText = user;
         text.innerText = message;
 
         newMessage.append(text);
+        newMessage.append(userName);
         chat.append(newMessage);
 }
 

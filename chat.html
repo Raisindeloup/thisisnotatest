@@ -6,24 +6,41 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twitch chat</title>
+
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
+    <script src="/tmi.js-main/tmi.min.js"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet"> 
 
+    <!---
+    COMFY JS : https://github.com/instafluff/ComfyJS
+    GITHUB : https://raisindeloup.github.io/thisisnotatest/chat.html
+    TUTO : https://dev.to/annetawamono/how-to-build-a-twitch-chat-overlay-326b
+    -->
+
     <style>
         body {
-              background-image: url('overlay_chatting2.png');
+              background-image: url('img/overlay_chattingTest.jpg');
               background-size: 1920px 1080px;
+
               font-family: 'Poppins', sans-serif;
             }
 
         #chat {
+            /******* Pour les tests ***********/
+            /*background: red;*/
+            margin:170pt 215pt;
+
+
             width: 600px;
             height: 600px;
             overflow: hidden; 
+
             display: flex;
             align-items: flex-end;
+
             font-size: 1.3em;
         }
 
@@ -58,18 +75,18 @@
 
         #chat div {
             z-index: 2;
+
             border-radius: 100pt;
-            color: #fff;
             padding: 5pt 0pt 0pt 0pt;
-            /*margin-bottom: -20px;*/
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
-            /*text-transform: uppercase;
-            font-size: 10px;*/
-            letter-spacing: 2px;
-            font-weight: 800;
+
+            color: #fff;
             text-shadow: 0px 0px 3px rgba(0,0,0,0.8);
+            font-weight: 800;
+            white-space: nowrap;
+            letter-spacing: 2px;
+
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         #chat div::before {
@@ -96,6 +113,13 @@
             border-left:1px solid #fff ;
         }
 
+        .broadcaster {
+            color: red !important;
+        }
+        .mod {
+            color: green !important;
+        }
+
         @keyframes slide-in-left {
             from {
                 transform: translateX(800px);
@@ -109,8 +133,8 @@
             }
         }
 
-
     </style>
+
 </head>
 <body>
     <div id="chat">
@@ -118,24 +142,84 @@
         </ul>
     </div>
 </body>
+
 <script>
-var chat = document.querySelector("#chat>ul");
+    const tmi = require('tmi.js');
+    const client = new tmi.Client({
+        channels: [ 'raisindeloup' ]
+    });
+    client.connect();
+</script>
 
-ComfyJS.onChat = (user, message, flags, self, extra) => {
-        var newMessage = document.createElement("li");
-        var text = document.createElement("blockquote");
-        var userName = document.createElement("div");
 
-        userName.innerText = user;
-        text.innerText = message;
+<script type="text/javascript">
+    var chat = document.querySelector("#chat>ul");
 
-        newMessage.append(text);
-        newMessage.append(userName);
-        chat.append(newMessage);
-}
+    ComfyJS.onChat = (user, message, flags, self, extra) => {
+            var newMessage = document.createElement("li");
+            var text = document.createElement("blockquote");
+            var userName = document.createElement("div");
 
-ComfyJS.Init("raisindeloup");
+            if( flags.broadcaster ) { //add class pour le streamer
+            userName.classList.add("broadcaster");
+            }
+            if( flags.mod ) {  //add class pour les modos
+            userName.classList.add("mod");
+            }
+            if( flags.subscriber ) {  //add class pour les subscribers
+            userName.classList.add("subscriber");
+            }
 
+            chat.appendChild(userName);
+
+            userName.innerText = user;
+            text.innerText = message;
+
+            newMessage.append(text);
+            newMessage.append(userName);
+            chat.append(newMessage);
+
+    }
+
+    ComfyJS.Init("raisindeloup");
+</script>
+
+<script type="text/javascript">
+    function getMessageHTML(message, { emotes }) {
+      if (!emotes) return message;
+
+      // store all emote keywords
+      // ! you have to first scan through 
+      // the message string and replace later
+      const stringReplacements = [];
+
+      // iterate of emotes to access ids and positions
+      Object.entries(emotes).forEach(([id, positions]) => {
+        // use only the first position to find out the emote key word
+        const position = positions[0];
+        const [start, end] = position.split("-");
+        const stringToReplace = message.substring(
+          parseInt(start, 10),
+          parseInt(end, 10) + 1
+        );
+
+        stringReplacements.push({
+          stringToReplace: stringToReplace,
+          replacement: `<img src="https://static-cdn.jtvnw.net/emoticons/v1/${id}/3.0">`,
+        });
+      });
+
+      // generate HTML and replace all emote keywords with image elements
+      const messageHTML = stringReplacements.reduce(
+        (acc, { stringToReplace, replacement }) => {
+          // obs browser doesn't seam to know about replaceAll
+          return acc.split(stringToReplace).join(replacement);
+        },
+        message
+      );
+
+      return messageHTML;
+    }
 
 </script>
 </html>
